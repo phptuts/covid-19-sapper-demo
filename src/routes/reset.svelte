@@ -19,6 +19,7 @@
 <style>
   .container {
     margin-bottom: 20px;
+    font-size: 20px;
   }
 </style>
 
@@ -28,14 +29,13 @@
 <div style="display: {showSuccess ? 'block' : 'none'}" class="ui container">
 
   <div class="ui success message">
-    <div class="header">You just deleeted cache.</div>
-    <p>When you navigate to the home screen it should take a little longer.</p>
+    <div class="header">You just refreshed the data.</div>
+    <p>Please do this sparingly. Thank you!!!</p>
   </div>
 </div>
 
 {#if refreshingCache}
   <div class="ui container">
-    <h1>Covid-19 Tracker</h1>
     <div class="ui active dimmer">
       <div class="ui text loader">Refreshing Data ...</div>
     </div>
@@ -43,5 +43,9 @@
 {/if}
 
 <div class="ui container">
+  <p>
+    Click this button will refresh the data for this website. It may take a few
+    seconds depending on your internet connection.
+  </p>
   <button on:click={removeCache} class="ui red basic button">Reset Data</button>
 </div>
