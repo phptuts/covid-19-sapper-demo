@@ -57,10 +57,11 @@ const reduceByCountry = (prev, next) => {
 
 const mergeTimeline = (prevTimeline, nextTimeline) => {
   return _.keys(prevTimeline).reduce((prev, dateString) => {
-    prev[dateString] += Math.abs(+nextTimeline[dateString]);
+    prev[dateString] =
+      Math.abs(+prevTimeline[dateString]) + Math.abs(+nextTimeline[dateString]);
 
     return prev;
-  }, prevTimeline);
+  }, {});
 };
 
 const parseAllTimelines = (timeline) => {
@@ -76,7 +77,7 @@ const parseTimeline = (timeline) => {
   return _.keys(timeline).reduce((prev, dateString) => {
     prev[dateString] = Math.abs(+timeline[dateString]);
     return prev;
-  }, timeline);
+  }, {});
 };
 
 export default {

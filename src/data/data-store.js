@@ -6,27 +6,8 @@ const historicDataKey = 'historic_data_key';
 const dataByCountryKey = 'data_by_country_key';
 const worldDataKey = 'world_data_key';
 const expiryTime = 1000 * 60 * 60;
-export default readable(undefined, (set) => {
-  populateData().then(() => {
-    set({
-      expiresAt: JSON.parse(localStorage.getItem(expiresAtKey)),
-      historicData: JSON.parse(localStorage.getItem(historicDataKey)),
-      dataByCountry: JSON.parse(localStorage.getItem(dataByCountryKey)),
-      worldStats: JSON.parse(localStorage.getItem(worldDataKey))
-    });
-  });
 
-  setInterval(() => {
-    populateData().then(() => {
-      set({
-        expiresAt: JSON.parse(localStorage.getItem(expiresAtKey)),
-        historicData: JSON.parse(localStorage.getItem(historicDataKey)),
-        dataByCountry: JSON.parse(localStorage.getItem(dataByCountryKey)),
-        worldStats: JSON.parse(localStorage.getItem(worldDataKey))
-      });
-    });
-  }, expiryTime);
-});
+let triggerRefresh = false;
 
 const getDataByCountry = async () => {
   const response = await fetch(
@@ -48,9 +29,10 @@ const historicData = async () => {
   return await response.json();
 };
 
-export const populateData = async () => {
-  const expireTimestamp = localStorage.getItem('covid_data_expires');
+const populateData = async () => {
+  const expireTimestamp = localStorage.getItem(expiresAtKey);
   if (!_.isEmpty(expireTimestamp) && expireTimestamp > new Date().getTime()) {
+    console.log('Cache Hit');
     return;
   }
 
@@ -94,14 +76,46 @@ export const populateData = async () => {
         })
     ]
   };
-  console.log(
-    countries.data
-      .map((d) => '<a href="/' + d.location + '">' + d.location + '</a>')
-      .join(' '),
-    'countries_export'
-  );
+  // console.log(
+  //   countries.data
+  //     .map((d) => '<a href="/' + d.location + '">' + d.location + '</a>')
+  //     .join(' '),
+  //   'countries_export'
+  // );
   localStorage.setItem(expiresAtKey, expiresAt);
   localStorage.setItem(worldDataKey, JSON.stringify(await worldData()));
   localStorage.setItem(historicDataKey, JSON.stringify(historic));
   localStorage.setItem(dataByCountryKey, JSON.stringify(countries));
 };
+
+export const deleteCache = () => {
+  triggerRefresh = true;
+  localStorage.removeItem(expiresAtKey);
+  localStorage.removeItem(worldDataKey);
+  localStorage.removeItem(historicDataKey);
+  localStorage.removeItem(dataByCountryKey);
+};
+
+export default readable(undefined, (set) => {
+  const setData = () => {
+    set({
+      expiresAt: JSON.parse(localStorage.getItem(expiresAtKey)),
+      historicData: JSON.parse(localStorage.getItem(historicDataKey)),
+      dataByCountry: JSON.parse(localStorage.getItem(dataByCountryKey)),
+      worldStats: JSON.parse(localStorage.getItem(worldDataKey))
+    });
+  };
+
+  populateData().then(() => setData());
+
+  setInterval(() => {
+    if (triggerRefresh) {
+      populateData().then(() => setData());
+      triggerRefresh = false;
+    }
+  }, 20);
+
+  setInterval(() => {
+    populateData().then(() => setData());
+  }, expiryTime);
+});

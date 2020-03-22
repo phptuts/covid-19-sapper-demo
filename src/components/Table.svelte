@@ -7,7 +7,6 @@
   export let fields;
   export let canNav = false;
   export let geoRegionName = "Country";
-  $: console.log(page, "page page");
   const pageSize = 10;
   const dispatch = createEventDispatcher();
 

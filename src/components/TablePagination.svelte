@@ -3,7 +3,6 @@
   export let colSpan = 9;
   export let page = 0;
   export let totalPages = 0;
-  $: console.log(totalPages, "inner total pages");
   $: shownPage = page + 1;
   $: moreThanLastPage = totalPages > 5;
   $: pages = doPaging(shownPage, 5, totalPages, 1);

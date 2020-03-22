@@ -5,7 +5,7 @@
 </script>
 
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import Table from "../components/Table.svelte";
   import Filter from "./../components/Filter.svelte";
   import CovidInfo from "./../components/CovidInfo.svelte";
@@ -13,6 +13,7 @@
   import dataStore from "../data/data-store.js";
   import timeline from "../data/timeline.js";
   import { filterByName } from "../data/helpers.js";
+  import _ from "lodash";
 
   export let country;
   let dataCountryKey = getDataKey(country);
@@ -25,6 +26,8 @@
   let page = 0;
   let loading = true;
   let historicCountryData = {};
+  let unsubscribe;
+
   const fields = ["Cases", "Deaths", "Recovered"];
   let countryInfo = {
     deaths: 0,
@@ -41,23 +44,27 @@
     page = 0;
   }
   onMount(() => {
-    dataStore.subscribe(info => {
-      console.log(info);
-
+    unsubscribe = dataStore.subscribe(info => {
       if (!info) {
         return;
       }
       provinces = timeline.byProvince(dataCountryKey, info.historicData);
+      const cloneHistoric = _.cloneDeep(info.historicData);
       historicCountryData = timeline.byCountry(info.historicData)[
-        dataCountryKey
-      ];
-
-      showProvinces = timeline.byProvince(dataCountryKey, info.historicData)[
         dataCountryKey
       ];
       countryInfo = info.dataByCountry.data.find(d => d.location === country);
       loading = false;
     });
+  });
+
+  onDestroy(() => {
+    if (_.isFunction(unsubscribe)) {
+      countryInfo = undefined;
+      provinces = undefined;
+      historicCountryData = undefined;
+      unsubscribe();
+    }
   });
 
   function getDataKey(country) {
@@ -85,7 +92,7 @@
 </style>
 
 <svelte:head>
-  <title>Covid 19 {country}</title>
+  <title>Covid 19 Tracker For {country}</title>
 </svelte:head>
 <div class="ui container">
   <h1>Country {country}</h1>
@@ -99,8 +106,8 @@
 
     <p>
       The information below may not be 100% accurate. It's coming from JHU CSSE
-      GISand Data. The goal is to show the how the covid-19 spreads over time
-      and what people mean when they talk about the curve. For more information
+      GISand Data. The goal is to show how the covid-19 spreads over time and
+      what people mean when they talk about the curve. For more information
       please consult the
       <a href="https://github.com/novelcovid/api">api github page.</a>
 
