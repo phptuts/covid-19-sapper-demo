@@ -107,7 +107,7 @@ export default {
       commonjs(),
       !dev &&
         terser() &&
-        ghPages.publish('__sapper__/export', () => {
+        ghPages.publish('__sapper__/export/covid-19-sapper-demo', () => {
           console.log('published to github');
         })
     ],
