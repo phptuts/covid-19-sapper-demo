@@ -37,7 +37,7 @@
 {#if refreshingCache}
   <div class="ui container">
     <div class="ui active dimmer">
-      <div class="ui text loader">Refreshing Data ...</div>
+      <div class="ui text loader">Refresh Data ...</div>
     </div>
   </div>
 {/if}
@@ -47,5 +47,7 @@
     Click this button will refresh the data for this website. It may take a few
     seconds depending on your internet connection.
   </p>
-  <button on:click={removeCache} class="ui red basic button">Reset Data</button>
+  <button on:click={removeCache} class="ui red basic button">
+    Refresh Data
+  </button>
 </div>
