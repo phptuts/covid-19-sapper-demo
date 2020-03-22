@@ -1,1 +1,0 @@
-import{S as t,i as e,s as o}from"./client.4e317382.js";function s(t){return window&&(alert("redirecting you to home screen"),window.locaction.href="https://phptuts.github.io/covid-19-sapper-demo/"),[]}export default class extends t{constructor(t){super(),e(this,t,s,null,o,{})}}
