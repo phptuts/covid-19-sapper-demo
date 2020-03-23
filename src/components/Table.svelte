@@ -1,6 +1,7 @@
 <script>
   import TablePagination from "./TablePagination.svelte";
   import { createEventDispatcher } from "svelte";
+  import _ from "lodash";
   export let list = [];
   export let sortBy = "none";
   export let page = 0;
@@ -16,6 +17,13 @@
     if (sortBy !== "none") {
       listShown = listShown.sort((a, b) => b[sortBy] - a[sortBy]);
     }
+  }
+
+  function locationChange(location) {
+    if (location.toLowerCase().includes("korea")) {
+      return "South Korea";
+    }
+    return location;
   }
 
   function onSelectedLocation(location) {
@@ -38,29 +46,27 @@
   }
 </style>
 
-{#if list.length > 0}
-  <div class="ui container">
-    <table class="ui celled table">
-      <thead>
-        <tr>
-          <th>{geoRegionName}</th>
+<div class="ui container">
+  <table class="ui celled table">
+    <thead>
+      <tr>
+        <th>{geoRegionName}</th>
+        {#each fields as field}
+          <th class:sorting={sortBy === field.toLowerCase()}>{field}</th>
+        {/each}
+      </tr>
+    </thead>
+    <tbody>
+      {#each listShown as geo (geo.location)}
+        <tr class:canNav on:click={onSelectedLocation(geo.location)}>
+          <td>{_.startCase(locationChange(geo.location))}</td>
+
           {#each fields as field}
-            <th class:sorting={sortBy === field.toLowerCase()}>{field}</th>
+            <td>{geo[field.toLowerCase()].toLocaleString()}</td>
           {/each}
         </tr>
-      </thead>
-      <tbody>
-        {#each listShown as geo (geo.location)}
-          <tr class:canNav on:click={onSelectedLocation(geo.location)}>
-            <td>{geo.location}</td>
-
-            {#each fields as field}
-              <td>{geo[field.toLowerCase()].toLocaleString()}</td>
-            {/each}
-          </tr>
-        {/each}
-      </tbody>
-      <TablePagination bind:totalPages bind:page />
-    </table>
-  </div>
-{/if}
+      {/each}
+    </tbody>
+    <TablePagination bind:totalPages bind:page />
+  </table>
+</div>

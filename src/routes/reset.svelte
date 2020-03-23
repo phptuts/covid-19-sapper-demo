@@ -1,18 +1,10 @@
 <script>
-  import { deleteCache } from "../data/data-store.js";
+  import { deleteCacheKeys } from "../data/cache.js";
   let showSuccess = false;
-  let refreshingCache = false;
-  import dataStore from "../data/data-store.js";
 
-  dataStore.subscribe(() => {
-    if (refreshingCache) {
-      refreshingCache = false;
-      showSuccess = true;
-    }
-  });
-  function removeCache() {
-    deleteCache();
-    refreshingCache = true;
+  function deleteCache() {
+    deleteCacheKeys();
+    showSuccess = true;
   }
 </script>
 
@@ -34,20 +26,12 @@
   </div>
 </div>
 
-{#if refreshingCache}
-  <div class="ui container">
-    <div class="ui active dimmer">
-      <div class="ui text loader">Refresh Data ...</div>
-    </div>
-  </div>
-{/if}
-
 <div class="ui container">
   <p>
-    Click this button will refresh the data for this website. It may take a few
-    seconds depending on your internet connection.
+    Click this button will refresh the data for this website. When you go to the
+    home page it might take a few seconds to load.
   </p>
-  <button on:click={removeCache} class="ui red basic button">
+  <button on:click={deleteCache} class="ui red basic button">
     Refresh Data
   </button>
 </div>

@@ -5,18 +5,23 @@
 </script>
 
 <script>
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
+  import { goto } from "@sapper/app";
+  import _ from "lodash";
+  import { filterByName } from "../data/helpers.js";
+
   import Table from "../components/Table.svelte";
   import Filter from "./../components/Filter.svelte";
   import CovidInfo from "./../components/CovidInfo.svelte";
   import CovidChart from "./../components/CovidChart.svelte";
-  import dataStore from "../data/data-store.js";
-  import timeline from "../data/timeline.js";
-  import { filterByName } from "../data/helpers.js";
-  import _ from "lodash";
+
+  import {
+    getDataForCountry,
+    getCountryTimeline,
+    getHistoricProvinceTableData
+  } from "../data/request.js";
 
   export let country;
-  let dataCountryKey = getDataKey(country);
   let pieChart;
   let lineChart;
   let provinces = [];
@@ -39,45 +44,22 @@
     todayCases: 0
   };
 
+  $: showCountry = country.toLowerCase().includes("korea")
+    ? "South Korea"
+    : country;
   $: showProvinces = filterByName(provinces, search);
   $: if (search.length > 0) {
     page = 0;
   }
-  onMount(() => {
-    unsubscribe = dataStore.subscribe(info => {
-      if (!info) {
-        return;
-      }
-      provinces = timeline.byProvince(dataCountryKey, info.historicData);
-      const cloneHistoric = _.cloneDeep(info.historicData);
-      historicCountryData = timeline.byCountry(info.historicData)[
-        dataCountryKey
-      ];
-      countryInfo = info.dataByCountry.data.find(d => d.location === country);
-      loading = false;
-    });
+  onMount(async () => {
+    countryInfo = await getDataForCountry(country);
+    historicCountryData = await getCountryTimeline(country);
+    provinces = await getHistoricProvinceTableData(country);
+    loading = false;
   });
 
-  onDestroy(() => {
-    if (_.isFunction(unsubscribe)) {
-      countryInfo = undefined;
-      provinces = undefined;
-      historicCountryData = undefined;
-      unsubscribe();
-    }
-  });
-
-  function getDataKey(country) {
-    if (country === "UK") {
-      return "United Kingdom";
-    }
-
-    if (country === "S. Korea") {
-      return "Korea, South";
-    }
-    // Filter out Hong Kong, Diamond Princess, U.S. Virgin Islands, French Guiana
-
-    return country;
+  async function changeLocation(event) {
+    await goto(country + "/" + event.detail);
   }
 </script>
 
@@ -85,38 +67,32 @@
   h1 {
     margin: 20px 0;
   }
-  #note {
-    margin-top: 20px;
-    font-size: 20px;
-  }
 </style>
 
 <svelte:head>
-  <title>Covid 19 Tracker For {country}</title>
+  <title>Covid 19 Tracker For {_.startCase(showCountry)}</title>
 </svelte:head>
-<div class="ui container">
-  <h1>Country {country}</h1>
 
+<div class="ui container">
+  <div class="ui breadcrumb">
+    <a href="/covid-19-sapper-demo" class="section">Home</a>
+    <div class="divider">/</div>
+    <div class="active section">{_.startCase(showCountry)}</div>
+  </div>
+</div>
+
+<div class="ui container">
+  <h1>Country {_.startCase(showCountry)}</h1>
 </div>
 
 {#if !loading}
   <CovidInfo {...countryInfo} />
-  <div id="note" class="ui container">
-    <h2>Important Note</h2>
-
-    <p>
-      The information below may not be 100% accurate. It's coming from JHU CSSE
-      GISand Data. The goal is to show how the covid-19 spreads over time and
-      what people mean when they talk about the curve. For more information
-      please consult the
-      <a href="https://github.com/novelcovid/api">api github page.</a>
-
-    </p>
-  </div>
-  <CovidChart historicData={historicCountryData} />
+  <CovidChart
+    title="Covid-19 State For {_.startCase(showCountry)}"
+    historicData={historicCountryData} />
 {/if}
 
-{#if showProvinces.length > 0}
+{#if provinces.length > 0}
   <div class="ui container">
     <h1>Search By Province / State</h1>
   </div>
@@ -129,6 +105,8 @@
     geoRegionName="Province / State"
     {fields}
     bind:page
+    on:location={changeLocation}
     {sortBy}
+    canNav="true"
     list={showProvinces} />
 {/if}

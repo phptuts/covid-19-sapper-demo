@@ -1,6 +1,8 @@
 <script>
   import { onMount } from "svelte";
 
+  import Chart from "chart.js";
+
   export let cases = 0;
   export let todayCases = 0;
   export let casesPerOneMillion = 0;

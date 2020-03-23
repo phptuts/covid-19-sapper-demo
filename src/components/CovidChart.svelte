@@ -1,12 +1,25 @@
 <script>
   import { onMount } from "svelte";
   import _ from "lodash";
-
-  let lineChart;
+  import Chart from "chart.js";
+  import "moment";
   export let historicData;
+  export let title;
+  let lineChart;
 
-  onMount(() => {
-    new Chart(lineChart.getContext("2d"), {
+  let isMount = false;
+  let chart;
+  $: if (!_.isEmpty(historicData) && isMount) {
+    console.log(isMount, "isMounted", historicData);
+    createChart();
+  }
+
+  const createChart = () => {
+    if (chart) {
+      chart.destroy();
+    }
+
+    chart = new Chart(lineChart.getContext("2d"), {
       // The type of chart we want to create
       type: "line",
 
@@ -46,7 +59,7 @@
         responsive: true,
         title: {
           display: true,
-          text: "Covid-19 Stats"
+          text: title
         },
         scales: {
           xAxes: [
@@ -73,6 +86,10 @@
         }
       }
     });
+  };
+
+  onMount(() => {
+    isMount = true;
   });
 </script>
 
