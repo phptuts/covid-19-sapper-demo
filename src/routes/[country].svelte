@@ -1,11 +1,33 @@
 <script context="module">
+  import {
+    getDataForCountry,
+    getCountryTimeline,
+    getHistoricProvinceTableData
+  } from "../data/request.js";
+
   export async function preload(page) {
+    try {
+      const country = page.params["country"];
+      const countryInfo = await getDataForCountry(country);
+      const historicCountryData = await getCountryTimeline(country);
+      const provinces = await getHistoricProvinceTableData(country);
+      return {
+        countryInfo,
+        historicCountryData,
+        provinces,
+        country
+      };
+    } catch (e) {
+      this.error(
+        500,
+        "There was an error in calling the api, please try again in 5 minutes."
+      );
+    }
     return { country: page.params["country"] };
   }
 </script>
 
 <script>
-  import { onMount } from "svelte";
   import { goto } from "@sapper/app";
   import _ from "lodash";
   import { filterByName } from "../data/helpers.js";
@@ -15,34 +37,21 @@
   import CovidInfo from "./../components/CovidInfo.svelte";
   import CovidChart from "./../components/CovidChart.svelte";
 
-  import {
-    getDataForCountry,
-    getCountryTimeline,
-    getHistoricProvinceTableData
-  } from "../data/request.js";
-
   export let country;
+  export let historicCountryData = {};
+  export let countryInfo = {};
+  export let provinces = [];
+
   let pieChart;
   let lineChart;
-  let provinces = [];
   let showProvinces = [];
   let sortBy = "none";
   let search = "";
   let page = 0;
   let loading = true;
-  let historicCountryData = {};
   let unsubscribe;
 
   const fields = ["Cases", "Deaths", "Recovered"];
-  let countryInfo = {
-    deaths: 0,
-    active: 0,
-    recovered: 0,
-    cases: 0,
-    casesPerOneMillion: 0,
-    todayDeaths: 0,
-    todayCases: 0
-  };
 
   $: showCountry = country.toLowerCase().includes("korea")
     ? "South Korea"
@@ -51,12 +60,6 @@
   $: if (search.length > 0) {
     page = 0;
   }
-  onMount(async () => {
-    countryInfo = await getDataForCountry(country);
-    historicCountryData = await getCountryTimeline(country);
-    provinces = await getHistoricProvinceTableData(country);
-    loading = false;
-  });
 
   async function changeLocation(event) {
     await goto(country + "/" + event.detail);
@@ -85,12 +88,10 @@
   <h1>Country {_.startCase(showCountry)}</h1>
 </div>
 
-{#if !loading}
-  <CovidInfo {...countryInfo} />
-  <CovidChart
-    title="Covid-19 State For {_.startCase(showCountry)}"
-    historicData={historicCountryData} />
-{/if}
+<CovidInfo {...countryInfo} />
+<CovidChart
+  title="Covid-19 State For {_.startCase(showCountry)}"
+  historicData={historicCountryData} />
 
 {#if provinces.length > 0}
   <div class="ui container">

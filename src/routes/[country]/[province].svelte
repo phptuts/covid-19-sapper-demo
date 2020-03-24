@@ -1,32 +1,47 @@
 <script context="module">
+  import { getHistoricTimelineDataForProvince } from "../../data/request.js";
+
   export async function preload(page) {
-    return {
-      country: page.params["country"],
-      province: page.params["province"]
-    };
+    try {
+      const {
+        timeline,
+        deaths,
+        recovered,
+        cases
+      } = await getHistoricTimelineDataForProvince(
+        page.params["country"],
+        page.params["province"]
+      );
+
+      return {
+        timeline,
+        deaths,
+        recovered,
+        cases,
+        country: page.params["country"],
+        province: page.params["province"]
+      };
+    } catch (e) {
+      this.error(
+        500,
+        "There was an error in calling the api, please try again in 5 minutes."
+      );
+    }
   }
 </script>
 
 <script>
   import _ from "lodash";
-  import { onMount } from "svelte";
 
   import CovidChart from "../../components/CovidChart.svelte";
   import CovidBasicStats from "./../../components/CovidBasicStats.svelte";
-  import { getHistoricTimelineDataForProvince } from "../../data/request.js";
   export let country;
   export let province;
 
-  let timeline = {};
-  let loading = true;
-  let deaths;
-  let recovered;
-  let cases;
-  onMount(async () => {
-    let data = await getHistoricTimelineDataForProvince(country, province);
-    ({ timeline, deaths, recovered, cases } = data);
-    loading = false;
-  });
+  export let timeline = {};
+  export let deaths;
+  export let recovered;
+  export let cases;
 </script>
 
 <style>
@@ -55,8 +70,6 @@
   {/if}
 </div>
 
-{#if !loading}
-  <CovidChart
-    title="Covid-19 State for {country} / {province}"
-    historicData={timeline} />
-{/if}
+<CovidChart
+  title="Covid-19 State for {country} / {province}"
+  historicData={timeline} />

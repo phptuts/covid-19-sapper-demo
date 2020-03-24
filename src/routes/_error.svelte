@@ -1,40 +1,17 @@
 <script>
-	export let status;
-	export let error;
-
-	const dev = process.env.NODE_ENV === 'development';
+  export let status;
+  export let error;
 </script>
 
-<style>
-	h1, p {
-		margin: 0 auto;
-	}
-
-	h1 {
-		font-size: 2.8em;
-		font-weight: 700;
-		margin: 0 0 0.5em 0;
-	}
-
-	p {
-		margin: 1em auto;
-	}
-
-	@media (min-width: 480px) {
-		h1 {
-			font-size: 4em;
-		}
-	}
-</style>
-
 <svelte:head>
-	<title>{status}</title>
+  <title>Covid 19 Error Page</title>
 </svelte:head>
 
-<h1>{status}</h1>
+<div class="ui container">
+  <h1>Covid-19 Tracker Error</h1>
 
-<p>{error.message}</p>
-
-{#if dev && error.stack}
-	<pre>{error.stack}</pre>
-{/if}
+  <div class="ui error message">
+    <div class="header">There was error.</div>
+    <p>{error.message}</p>
+  </div>
+</div>

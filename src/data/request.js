@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import superagent from 'superagent';
 import { saveCache, getCacheData } from './cache.js';
 
 const allCountriesDataCacheKey = 'all_countries_cache_key';
@@ -12,12 +13,11 @@ export const getDataForCountries = async () => {
     return cachedData;
   }
 
-  const response = await fetch(
-    'https://coronavirus-19-api.herokuapp.com/countries'
+  const response = await superagent.get(
+    'https://corona.lmao.ninja/countries/countries'
   );
-  const json = await response.json();
 
-  const data = json.map((data) => {
+  const data = response.body.map((data) => {
     return { ...data, location: mapCountryToHistoryCountry(data.country) };
   });
 
@@ -32,13 +32,11 @@ export const getWorldData = async () => {
     return cachedData;
   }
 
-  const response = await fetch('https://corona.lmao.ninja/all');
+  const response = await superagent.get('https://corona.lmao.ninja/all');
 
-  const data = await response.json();
+  saveCache(allWorldCacheKey, response.body);
 
-  saveCache(allWorldCacheKey, data);
-
-  return data;
+  return response.body;
 };
 
 export const historicData = async () => {
@@ -48,13 +46,11 @@ export const historicData = async () => {
     return cachedData;
   }
 
-  const response = await fetch('https://corona.lmao.ninja/historical');
+  const response = await superagent.get('https://corona.lmao.ninja/historical');
 
-  const data = await response.json();
+  saveCache(worldHistoricCacheKey, response.body);
 
-  saveCache(worldHistoricCacheKey, data);
-
-  return data;
+  return response.body;
 };
 
 export const getCountryTimeline = async (country) => {
@@ -63,19 +59,16 @@ export const getCountryTimeline = async (country) => {
   const cachedData = getCacheData(cacheKey);
 
   if (cachedData) {
-    console.log('cache hit');
     return cachedData.timeline;
   }
 
-  const response = await fetch(
+  const response = await superagent.get(
     'https://corona.lmao.ninja/historical/' + countryKey
   );
 
-  const data = await response.json();
+  saveCache(cacheKey, response.body);
 
-  saveCache(cacheKey, data);
-
-  return data.timeline;
+  return response.body.timeline;
 };
 
 export const getDataForCountry = async (country) => {

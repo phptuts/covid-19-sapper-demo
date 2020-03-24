@@ -15,7 +15,7 @@ export const deleteCacheKeys = () => {
 };
 
 export const getCacheData = (cacheKey) => {
-  if (!localStorage) {
+  if (!process.browser) {
     return;
   }
 
@@ -34,7 +34,7 @@ export const getCacheData = (cacheKey) => {
 };
 
 export const saveCache = (cacheKey, data) => {
-  if (!localStorage) {
+  if (!process.browser) {
     return;
   }
 
