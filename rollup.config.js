@@ -64,6 +64,9 @@ export default {
       !dev &&
         terser({
           module: true
+        }) &&
+        ghPages.publish('__sapper__/export/covid-19-sapper-demo', () => {
+          console.log('published to github');
         })
     ],
 
@@ -105,11 +108,7 @@ export default {
         'process.env.NODE_ENV': JSON.stringify(mode)
       }),
       commonjs(),
-      !dev &&
-        terser() &&
-        ghPages.publish('__sapper__/export/covid-19-sapper-demo', () => {
-          console.log('published to github');
-        })
+      !dev && terser()
     ],
 
     onwarn
