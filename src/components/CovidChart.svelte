@@ -1,24 +1,16 @@
 <script>
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
   import Chart from "chart.js";
   import "moment";
   export let historicData;
   export let title;
   let lineChart;
-
+  let hideChart = false;
   let isMount = false;
   let chart;
-  $: if (!_.isEmpty(historicData) && isMount) {
-    console.log(isMount, "isMounted", historicData);
-    createChart();
-  }
 
   const createChart = () => {
-    if (chart) {
-      chart.destroy();
-    }
-
     chart = new Chart(lineChart.getContext("2d"), {
       // The type of chart we want to create
       type: "line",
@@ -42,15 +34,6 @@
             fill: false,
             borderColor: "rgb(255, 99, 132)"
           },
-
-          {
-            label: "Recovered",
-            data: _.keys(historicData.recovered).map(key => {
-              return { x: key, y: historicData.recovered[key] };
-            }),
-            fill: false,
-            borderColor: "rgb(54, 162, 235)"
-          }
         ]
       },
 
@@ -89,10 +72,22 @@
   };
 
   onMount(() => {
-    isMount = true;
+    if (!_.isEmpty(historicData) && document.body.clientWidth > 680) {
+      createChart();
+      return;
+    }
+    hideChart = true;
+  });
+
+  onDestroy(() => {
+    if (chart) {
+      chart.destroy();
+    }
   });
 </script>
 
-<div class="ui container">
-  <canvas bind:this={lineChart} />
-</div>
+{#if !hideChart}
+  <div class="ui container">
+    <canvas bind:this={lineChart} />
+  </div>
+{/if}

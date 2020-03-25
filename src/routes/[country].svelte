@@ -1,8 +1,8 @@
 <script context="module">
   import {
     getDataForCountry,
-    getCountryTimeline,
-    getHistoricProvinceTableData
+    getProvincesForCountry,
+    getCountryTimeline
   } from "../data/request.js";
 
   export async function preload(page) {
@@ -10,7 +10,9 @@
       const country = page.params["country"];
       const countryInfo = await getDataForCountry(country);
       const historicCountryData = await getCountryTimeline(country);
-      const provinces = await getHistoricProvinceTableData(country);
+      const provinces = await getProvincesForCountry(
+        historicCountryData.country
+      );
       return {
         countryInfo,
         historicCountryData,
@@ -41,7 +43,6 @@
   export let historicCountryData = {};
   export let countryInfo = {};
   export let provinces = [];
-
   let pieChart;
   let lineChart;
   let showProvinces = [];
@@ -91,7 +92,7 @@
 <CovidInfo {...countryInfo} />
 <CovidChart
   title="Covid-19 State For {_.startCase(showCountry)}"
-  historicData={historicCountryData} />
+  historicData={historicCountryData.timeline} />
 
 {#if provinces.length > 0}
   <div class="ui container">
@@ -108,6 +109,6 @@
     bind:page
     on:location={changeLocation}
     {sortBy}
-    canNav="true"
+    canNav={false}
     list={showProvinces} />
 {/if}

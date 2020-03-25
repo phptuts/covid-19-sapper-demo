@@ -1,12 +1,18 @@
 <script context="module">
-  import { getWorldData, getDataForCountries } from "../data/request.js";
+  import {
+    getWorldStats,
+    getDataForCountries,
+    getWorldTimeline
+  } from "../data/request.js";
 
   export async function preload(page) {
     try {
       const countries = await getDataForCountries();
-      const worldStats = await getWorldData();
-      return { countries, worldStats };
+      const worldStats = await getWorldStats();
+      const worldTimeline = await getWorldTimeline();
+      return { countries, worldStats, worldTimeline };
     } catch (e) {
+      console.log(e);
       this.error(
         500,
         "There was an error in calling the api, please try again in 5 minutes."
@@ -19,6 +25,7 @@
   import Table from "../components/Table.svelte";
   import Filter from "./../components/Filter.svelte";
   import CovidBasicStats from "./../components/CovidBasicStats.svelte";
+  import CovidChart from "./../components/CovidChart.svelte";
 
   import { filterByName } from "../data/helpers.js";
   import _ from "lodash";
@@ -30,6 +37,7 @@
 
   export let worldStats = { cases: 0, deaths: 0, recovered: 0 };
   export let countries = [];
+  export let worldTimeline = {};
   let showCountries = [];
   let sortBy = "none";
   let search = "";
@@ -64,6 +72,8 @@
     recovered={worldStats.recovered}
     cases={worldStats.cases} />
 </div>
+<CovidChart title="Covid-19 For World" historicData={worldTimeline} />
+
 <div class="ui container">
   <h2>Search By Country</h2>
 </div>
@@ -75,3 +85,203 @@
   bind:page
   canNav="true"
   list={showCountries} />
+
+<div style="visibility: hidden;">
+  <a href="China">China</a>
+  <a href="Italy">Italy</a>
+  <a href="USA">USA</a>
+  <a href="Spain">Spain</a>
+  <a href="Germany">Germany</a>
+  <a href="Iran">Iran</a>
+  <a href="France">France</a>
+  <a href="Switzerland">Switzerland</a>
+  <a href="UK">UK</a>
+  <a href="S. Korea">S. Korea</a>
+  <a href="Netherlands">Netherlands</a>
+  <a href="Austria">Austria</a>
+  <a href="Belgium">Belgium</a>
+  <a href="Canada">Canada</a>
+  <a href="Norway">Norway</a>
+  <a href="Portugal">Portugal</a>
+  <a href="Sweden">Sweden</a>
+  <a href="Turkey">Turkey</a>
+  <a href="Brazil">Brazil</a>
+  <a href="Australia">Australia</a>
+  <a href="Israel">Israel</a>
+  <a href="Malaysia">Malaysia</a>
+  <a href="Denmark">Denmark</a>
+  <a href="Czechia">Czechia</a>
+  <a href="Ireland">Ireland</a>
+  <a href="Luxembourg">Luxembourg</a>
+  <a href="Japan">Japan</a>
+  <a href="Ecuador">Ecuador</a>
+  <a href="Chile">Chile</a>
+  <a href="Pakistan">Pakistan</a>
+  <a href="Poland">Poland</a>
+  <a href="Thailand">Thailand</a>
+  <a href="Romania">Romania</a>
+  <a href="Saudi Arabia">Saudi Arabia</a>
+  <a href="Finland">Finland</a>
+  <a href="Greece">Greece</a>
+  <a href="Indonesia">Indonesia</a>
+  <a href="Iceland">Iceland</a>
+  <a href="Diamond Princess">Diamond Princess</a>
+  <a href="South Africa">South Africa</a>
+  <a href="Russia">Russia</a>
+  <a href="India">India</a>
+  <a href="Philippines">Philippines</a>
+  <a href="Singapore">Singapore</a>
+  <a href="Qatar">Qatar</a>
+  <a href="Slovenia">Slovenia</a>
+  <a href="Peru">Peru</a>
+  <a href="Colombia">Colombia</a>
+  <a href="Egypt">Egypt</a>
+  <a href="Panama">Panama</a>
+  <a href="Croatia">Croatia</a>
+  <a href="Bahrain">Bahrain</a>
+  <a href="Hong Kong">Hong Kong</a>
+  <a href="Mexico">Mexico</a>
+  <a href="Estonia">Estonia</a>
+  <a href="Dominican Republic">Dominican Republic</a>
+  <a href="Argentina">Argentina</a>
+  <a href="Serbia">Serbia</a>
+  <a href="Iraq">Iraq</a>
+  <a href="Lebanon">Lebanon</a>
+  <a href="UAE">UAE</a>
+  <a href="Algeria">Algeria</a>
+  <a href="Lithuania">Lithuania</a>
+  <a href="Armenia">Armenia</a>
+  <a href="Bulgaria">Bulgaria</a>
+  <a href="Taiwan">Taiwan</a>
+  <a href="Hungary">Hungary</a>
+  <a href="Morocco">Morocco</a>
+  <a href="Latvia">Latvia</a>
+  <a href="Slovakia">Slovakia</a>
+  <a href="San Marino">San Marino</a>
+  <a href="New Zealand">New Zealand</a>
+  <a href="Costa Rica">Costa Rica</a>
+  <a href="Kuwait">Kuwait</a>
+  <a href="Uruguay">Uruguay</a>
+  <a href="Andorra">Andorra</a>
+  <a href="North Macedonia">North Macedonia</a>
+  <a href="Tunisia">Tunisia</a>
+  <a href="Bosnia and Herzegovina">Bosnia and Herzegovina</a>
+  <a href="Jordan">Jordan</a>
+  <a href="Moldova">Moldova</a>
+  <a href="Albania">Albania</a>
+  <a href="Burkina Faso">Burkina Faso</a>
+  <a href="Ukraine">Ukraine</a>
+  <a href="Vietnam">Vietnam</a>
+  <a href="Cyprus">Cyprus</a>
+  <a href="Faeroe Islands">Faeroe Islands</a>
+  <a href="Malta">Malta</a>
+  <a href="Réunion">Réunion</a>
+  <a href="Brunei">Brunei</a>
+  <a href="Sri Lanka">Sri Lanka</a>
+  <a href="Oman">Oman</a>
+  <a href="Senegal">Senegal</a>
+  <a href="Cambodia">Cambodia</a>
+  <a href="Azerbaijan">Azerbaijan</a>
+  <a href="Venezuela">Venezuela</a>
+  <a href="Belarus">Belarus</a>
+  <a href="Afghanistan">Afghanistan</a>
+  <a href="Kazakhstan">Kazakhstan</a>
+  <a href="Cameroon">Cameroon</a>
+  <a href="Georgia">Georgia</a>
+  <a href="Guadeloupe">Guadeloupe</a>
+  <a href="Ivory Coast">Ivory Coast</a>
+  <a href="Ghana">Ghana</a>
+  <a href="Martinique">Martinique</a>
+  <a href="Palestine">Palestine</a>
+  <a href="Trinidad and Tobago">Trinidad and Tobago</a>
+  <a href="Uzbekistan">Uzbekistan</a>
+  <a href="Cuba">Cuba</a>
+  <a href="Montenegro">Montenegro</a>
+  <a href="Liechtenstein">Liechtenstein</a>
+  <a href="DRC">DRC</a>
+  <a href="Mauritius">Mauritius</a>
+  <a href="Nigeria">Nigeria</a>
+  <a href="Kyrgyzstan">Kyrgyzstan</a>
+  <a href="Rwanda">Rwanda</a>
+  <a href="Bangladesh">Bangladesh</a>
+  <a href="Channel Islands">Channel Islands</a>
+  <a href="Paraguay">Paraguay</a>
+  <a href="Honduras">Honduras</a>
+  <a href="Mayotte">Mayotte</a>
+  <a href="Bolivia">Bolivia</a>
+  <a href="Monaco">Monaco</a>
+  <a href="Macao">Macao</a>
+  <a href="French Guiana">French Guiana</a>
+  <a href="Kenya">Kenya</a>
+  <a href="Gibraltar">Gibraltar</a>
+  <a href="Jamaica">Jamaica</a>
+  <a href="French Polynesia">French Polynesia</a>
+  <a href="Guatemala">Guatemala</a>
+  <a href="Isle of Man">Isle of Man</a>
+  <a href="Togo">Togo</a>
+  <a href="Madagascar">Madagascar</a>
+  <a href="Barbados">Barbados</a>
+  <a href="Aruba">Aruba</a>
+  <a href="New Caledonia">New Caledonia</a>
+  <a href="Uganda">Uganda</a>
+  <a href="Maldives">Maldives</a>
+  <a href="Ethiopia">Ethiopia</a>
+  <a href="Tanzania">Tanzania</a>
+  <a href="Zambia">Zambia</a>
+  <a href="Djibouti">Djibouti</a>
+  <a href="Saint Martin">Saint Martin</a>
+  <a href="Mongolia">Mongolia</a>
+  <a href="El Salvador">El Salvador</a>
+  <a href="Equatorial Guinea">Equatorial Guinea</a>
+  <a href="Cayman Islands">Cayman Islands</a>
+  <a href="Haiti">Haiti</a>
+  <a href="Suriname">Suriname</a>
+  <a href="Niger">Niger</a>
+  <a href="Dominica">Dominica</a>
+  <a href="Namibia">Namibia</a>
+  <a href="Seychelles">Seychelles</a>
+  <a href="Curaçao">Curaçao</a>
+  <a href="Gabon">Gabon</a>
+  <a href="Benin">Benin</a>
+  <a href="Bermuda">Bermuda</a>
+  <a href="Greenland">Greenland</a>
+  <a href="Guyana">Guyana</a>
+  <a href="Bahamas">Bahamas</a>
+  <a href="Fiji">Fiji</a>
+  <a href="Mozambique">Mozambique</a>
+  <a href="Syria">Syria</a>
+  <a href="Cabo Verde">Cabo Verde</a>
+  <a href="Congo">Congo</a>
+  <a href="Eritrea">Eritrea</a>
+  <a href="Guinea">Guinea</a>
+  <a href="Vatican City">Vatican City</a>
+  <a href="Eswatini">Eswatini</a>
+  <a href="Gambia">Gambia</a>
+  <a href="Sudan">Sudan</a>
+  <a href="Zimbabwe">Zimbabwe</a>
+  <a href="Nepal">Nepal</a>
+  <a href="Angola">Angola</a>
+  <a href="Antigua and Barbuda">Antigua and Barbuda</a>
+  <a href="CAR">CAR</a>
+  <a href="Chad">Chad</a>
+  <a href="Laos">Laos</a>
+  <a href="Liberia">Liberia</a>
+  <a href="Myanmar">Myanmar</a>
+  <a href="St. Barth">St. Barth</a>
+  <a href="Saint Lucia">Saint Lucia</a>
+  <a href="Sint Maarten">Sint Maarten</a>
+  <a href="Bhutan">Bhutan</a>
+  <a href="Guinea-Bissau">Guinea-Bissau</a>
+  <a href="Mali">Mali</a>
+  <a href="Mauritania">Mauritania</a>
+  <a href="Nicaragua">Nicaragua</a>
+  <a href="Belize">Belize</a>
+  <a href="Grenada">Grenada</a>
+  <a href="Libya">Libya</a>
+  <a href="Montserrat">Montserrat</a>
+  <a href="Papua New Guinea">Papua New Guinea</a>
+  <a href="St. Vincent Grenadines">St. Vincent Grenadines</a>
+  <a href="Somalia">Somalia</a>
+  <a href="Timor-Leste">Timor-Leste</a>
+  <a href="Turks and Caicos">Turks and Caicos</a>
+</div>

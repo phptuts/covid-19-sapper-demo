@@ -1,6 +1,6 @@
 <script>
-  export let status;
   export let error;
+  console.log(error);
 </script>
 
 <svelte:head>

@@ -48,3 +48,7 @@ export const saveCache = (cacheKey, data) => {
   localStorage.setItem(cacheKeysKey, JSON.stringify(cacheKeys));
   console.log('cache key saved ' + cacheKey);
 };
+
+const saveCountryCacheData = (data, country, cackeKeyBase) => {
+
+}

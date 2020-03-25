@@ -1,32 +1,16 @@
 import _ from 'lodash';
 import superagent from 'superagent';
 import { saveCache, getCacheData } from './cache.js';
+import { standardizeCountryName } from './countryNameFixer';
 
-const allCountriesDataCacheKey = 'all_countries_cache_key';
-const worldHistoricCacheKey = 'world_data_cache_key';
+const allCountryTimelineData = 'all_country_timeline_data';
+const allCountriesDataCacheKey = 'all_country_data_cache_key';
+const countryTimelineCacheKey = 'country_timeline_cache_key_';
+const countryDataCacheKey = 'country_data_cache_key_';
+const provinceCacheKey = 'province_cache_key';
 const allWorldCacheKey = 'all_world_cache_key';
-const countryTimelineCacheKey = 'country_timeline_cache_key';
 
-export const getDataForCountries = async () => {
-  const cachedData = getCacheData(allCountriesDataCacheKey);
-  if (cachedData) {
-    return cachedData;
-  }
-
-  const response = await superagent.get(
-    'https://corona.lmao.ninja/countries/countries'
-  );
-
-  const data = response.body.map((data) => {
-    return { ...data, location: mapCountryToHistoryCountry(data.country) };
-  });
-
-  saveCache(allCountriesDataCacheKey, data);
-
-  return data;
-};
-
-export const getWorldData = async () => {
+export const getWorldStats = async () => {
   const cachedData = getCacheData(allWorldCacheKey);
   if (cachedData) {
     return cachedData;
@@ -39,102 +23,119 @@ export const getWorldData = async () => {
   return response.body;
 };
 
-export const historicData = async () => {
-  const cachedData = getCacheData(worldHistoricCacheKey);
+export const getDataForCountries = async () => {
+  const cachedData = getCacheData(allCountriesDataCacheKey);
+  if (cachedData) {
+    return cachedData;
+  }
+
+  const response = await superagent.get('https://corona.lmao.ninja/countries');
+
+  const countriesData = response.body.map((c) => {
+    return { ...c, location: c.country };
+  });
+
+  saveCache(allCountriesDataCacheKey, countriesData);
+
+  return countriesData;
+};
+
+export const getProvincesForCountry = async (country) => {
+  const data = await getDataProvinces();
+
+  return data
+    .filter((data) => {
+      return (
+        !_.isEmpty(data.province) &&
+        standardizeCountryName(data.country.toLowerCase()) ===
+          standardizeCountryName(country.toLowerCase()) &&
+        !data.province.toLowerCase().includes('princess')
+      );
+    })
+    .map((provinceData) => {
+      return {
+        location: provinceData.province,
+        deaths: provinceData.stats.deaths,
+        cases: provinceData.stats.confirmed,
+        recovered: provinceData.stats.recovered
+      };
+    });
+};
+
+export const getDataForCountry = async (country) => {
+  const cacheKey = countryDataCacheKey + country.toLowerCase();
+  const cachedData = getCacheData(cacheKey);
 
   if (cachedData) {
     return cachedData;
   }
 
-  const response = await superagent.get('https://corona.lmao.ninja/historical');
-
-  saveCache(worldHistoricCacheKey, response.body);
+  const response = await superagent.get(
+    'https://corona.lmao.ninja/countries/' + country.toLowerCase()
+  );
+  saveCache(cacheKey, response.body);
 
   return response.body;
 };
 
 export const getCountryTimeline = async (country) => {
-  const countryKey = mapCountryToHistoryCountry(country);
-  const cacheKey = countryTimelineCacheKey + '_' + countryKey;
+  const cacheKey = countryTimelineCacheKey + country.toLowerCase();
   const cachedData = getCacheData(cacheKey);
 
   if (cachedData) {
-    return cachedData.timeline;
+    return cachedData;
   }
 
   const response = await superagent.get(
-    'https://corona.lmao.ninja/historical/' + countryKey
+    'https://corona.lmao.ninja/v2/historical/' + country
   );
-
   saveCache(cacheKey, response.body);
 
-  return response.body.timeline;
+  return response.body;
 };
 
-export const getDataForCountry = async (country) => {
-  return (await getDataForCountries()).find(
-    (c) => c.location.toLowerCase() === country.toLowerCase()
-  );
+export const getWorldTimeline = async () => {
+  try {
+    const countriesData = await getCountriesTimeline();
+
+    return countriesData.reduce(
+      (prev, countryData) => {
+        _.keys(countryData.timeline.deaths).forEach((key) => {
+          if (!prev.cases[key]) {
+            prev.cases[key] = 0;
+            prev.deaths[key] = 0;
+          }
+          prev.cases[key] += countryData.timeline.cases[key];
+          prev.deaths[key] += countryData.timeline.deaths[key];
+        });
+        return prev;
+      },
+      { cases: {}, deaths: {} }
+    );
+  } catch (e) {
+    return { cases: {}, deaths: {} };
+  }
 };
 
-export const getHistoricCountryProvinceData = async (country, province) => {
-  const data = await historicData();
+const getDataProvinces = async () => {
+  const response = await superagent.get('https://corona.lmao.ninja/v2/jhucsse');
 
-  return data.find(
-    (d) =>
-      d.country.toLowerCase() ===
-        mapCountryToHistoryCountry(country).toLowerCase() &&
-      d.province.toLowerCase() === province.toLowerCase()
-  );
+  saveCache(provinceCacheKey, response.body);
+
+  return response.body;
 };
 
-export const getHistoricTimelineDataForProvince = async (country, province) => {
-  const data = await historicData();
+const getCountriesTimeline = async () => {
+  const cachedData = getCacheData(allCountryTimelineData);
 
-  const info = data.find(
-    (d) =>
-      d.country.toLowerCase() ===
-        mapCountryToHistoryCountry(country).toLowerCase() &&
-      d.province.toLowerCase() === province.toLowerCase()
-  );
-
-  const lastKey = _.last(_.keys(info.timeline.cases));
-  const generalInfo = {
-    location: info.province,
-    cases: info.timeline.cases[lastKey],
-    recovered: info.timeline.recovered[lastKey],
-    deaths: info.timeline.deaths[lastKey]
-  };
-  return { ...generalInfo, timeline: info.timeline };
-};
-
-export const getHistoricProvinceTableData = async (country) => {
-  const data = await historicData();
-  return data
-    .filter((d) => {
-      return (
-        d.country.toLowerCase() ===
-          mapCountryToHistoryCountry(country.toLowerCase()) &&
-        !_.isEmpty(d.province) &&
-        !d.province.toLowerCase().includes('princess')
-      );
-    })
-    .map((d) => {
-      const lastKey = _.last(_.keys(d.timeline.cases));
-      return {
-        location: _.startCase(d.province),
-        cases: d.timeline.cases[lastKey],
-        recovered: d.timeline.recovered[lastKey],
-        deaths: d.timeline.deaths[lastKey]
-      };
-    })
-    .filter((d) => d.cases > 0);
-};
-
-const mapCountryToHistoryCountry = (country) => {
-  if (country.toLowerCase().includes('korea')) {
-    return 'korea, south';
+  if (cachedData) {
+    return cachedData;
   }
 
-  return country;
+  const response = await superagent.get(
+    'https://corona.lmao.ninja/v2/historical'
+  );
+  saveCache(allCountryTimelineData, response.body);
+
+  return response.body;
 };
