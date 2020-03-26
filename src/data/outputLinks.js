@@ -11,7 +11,14 @@ const getRoutes = async () => {
   const countries = response.body;
   for (let countryKey in countries) {
     const countryData = countries[countryKey];
-    routes.push({ route: countryData.country, name: countryData.country });
+
+    let country = countryData.country;
+    // Temp Fix
+    if (country.toLowerCase().includes('iran')) {
+      country = 'Iran';
+    }
+
+    routes.push({ route: country, name: country });
   }
 
   fs.writeFileSync(

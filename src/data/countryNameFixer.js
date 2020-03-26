@@ -11,6 +11,7 @@ const countryMapping = [
   {possibleNames: ["united arab emirates"], standardizedName: "uae"},
   {possibleNames: ["bosnia and herzegovina"], standardizedName: "bosnia"},
   {possibleNames: ["virgin islands"], standardizedName: "u.s. virgin islands"},
+  { possibleNames: ['Iran Islamic Republic Of'], standardizedName: 'iran' },
   {possibleNames: ["czech republic"], standardizedName: "czechia"},
   {possibleNames: ["méxico"], standardizedName: "mexico"},
   {possibleNames: ["brasil"], standardizedName: "brazil"},

@@ -32,7 +32,14 @@ export const getDataForCountries = async () => {
   const response = await superagent.get('https://corona.lmao.ninja/countries');
 
   const countriesData = response.body.map((c) => {
-    return { ...c, location: c.country };
+    let country = c.country;
+
+    // Temp Fix
+    if (country.toLowerCase().includes('iran')) {
+      country = 'Iran';
+    }
+
+    return { ...c, location: country };
   });
 
   saveCache(allCountriesDataCacheKey, countriesData);
