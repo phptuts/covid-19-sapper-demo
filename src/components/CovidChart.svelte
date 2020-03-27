@@ -7,6 +7,7 @@
   export let title;
   let lineChart;
   let hideChart = false;
+  let noHistoricData = false;
   let isMount = false;
   let chart;
 
@@ -33,7 +34,7 @@
             }),
             fill: false,
             borderColor: "rgb(255, 99, 132)"
-          },
+          }
         ]
       },
 
@@ -72,10 +73,20 @@
   };
 
   onMount(() => {
-    if (!_.isEmpty(historicData) && document.body.clientWidth > 680) {
+    console.log(!_.isEmpty(historicData.cases));
+    if (
+      !_.isEmpty(historicData) &&
+      !_.isEmpty(historicData.cases) &&
+      document.body.clientWidth > 680
+    ) {
       createChart();
       return;
     }
+
+    if (_.isEmpty(historicData.cases)) {
+      noHistoricData = true;
+    }
+
     hideChart = true;
   });
 
@@ -86,8 +97,21 @@
   });
 </script>
 
+<style>
+  .ui.container {
+    text-align: center;
+    margin-top: 60px;
+  }
+</style>
+
 {#if !hideChart}
   <div class="ui container">
     <canvas bind:this={lineChart} />
+  </div>
+{/if}
+
+{#if noHistoricData}
+  <div class="ui container">
+    <h2>No historic data is available at this time.</h2>
   </div>
 {/if}

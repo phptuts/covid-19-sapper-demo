@@ -31,9 +31,15 @@
     return location;
   }
 
-  function onSelectedLocation(location) {
+  function onClickLocation(location) {
     if (canNav) {
-      dispatch("location", location);
+      dispatch("navigate", location);
+    }
+  }
+
+  function onHoverLocation(location) {
+    if (canNav) {
+      dispatch("hover", location);
     }
   }
 </script>
@@ -63,8 +69,11 @@
     </thead>
     <tbody>
       {#each listShown as geo (geo.location)}
-        <tr class:canNav on:click={onSelectedLocation(geo.location)}>
-          <td>{_.startCase(locationChange(geo.location))}</td>
+        <tr
+          class:canNav
+          on:mouseover={onHoverLocation(geo.location)}
+          on:click={onClickLocation(geo.location)}>
+          <td>{_.startCase(geo.location)}</td>
 
           {#each fields as field}
             <td>{geo[field.toLowerCase()].toLocaleString()}</td>

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import superagent from 'superagent';
 import { saveCache, getCacheData } from './cache.js';
 import { standardizeCountryName } from './countryNameFixer';
+import request from 'superagent';
 
 const allCountryTimelineData = 'all_country_timeline_data';
 const allCountriesDataCacheKey = 'all_country_data_cache_key';
@@ -17,10 +18,11 @@ export const getWorldStats = async () => {
   }
 
   const response = await superagent.get('https://corona.lmao.ninja/all');
+  const data = { ...response.body, updated: new Date(response.body.updated) };
 
-  saveCache(allWorldCacheKey, response.body);
+  saveCache(allWorldCacheKey, data);
 
-  return response.body;
+  return data;
 };
 
 export const getDataForCountries = async () => {

@@ -29,7 +29,7 @@
 
   import { filterByName } from "../data/helpers.js";
   import _ from "lodash";
-  import { goto } from "@sapper/app";
+  import { goto, prefetch } from "@sapper/app";
 
   const fields = ["Cases", "Deaths", "Recovered", "Active", "Critical"];
 
@@ -49,6 +49,11 @@
 
   async function changeLocation(event) {
     await goto(event.detail);
+  }
+
+  async function prefetchLocation(event) {
+    console.log(event);
+    await prefetch(event.detail);
   }
 </script>
 
@@ -70,6 +75,7 @@
   <CovidBasicStats
     deaths={worldStats.deaths}
     recovered={worldStats.recovered}
+    updated={worldStats.updated}
     cases={worldStats.cases} />
 </div>
 <CovidChart title="Covid-19 For World" historicData={worldTimeline} />
@@ -79,7 +85,8 @@
 </div>
 <Filter {selectFields} bind:sortBy bind:search />
 <Table
-  on:location={changeLocation}
+  on:navigate={changeLocation}
+  on:hover={prefetchLocation}
   {fields}
   {sortBy}
   bind:page
