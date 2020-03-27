@@ -52,7 +52,7 @@
   let loading = true;
   let unsubscribe;
 
-  const fields = ["Cases", "Deaths", "Recovered"];
+  const fields = ["Cases", "Deaths"];
 
   $: showCountry = country.toLowerCase().includes("korea")
     ? "South Korea"

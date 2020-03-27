@@ -13,10 +13,15 @@
 
   $: totalPages = Math.ceil(list.length / pageSize);
   $: listShown = list.slice(page * pageSize, page * pageSize + pageSize);
-  $: {
+  $: list = sortList(sortBy);
+
+  function sortList(sortBy) {
     if (sortBy !== "none") {
-      listShown = listShown.sort((a, b) => b[sortBy] - a[sortBy]);
+      return list.sort((a, b) => b[sortBy] - a[sortBy]);
+      page = 0;
     }
+
+    return list;
   }
 
   function locationChange(location) {

@@ -56,7 +56,8 @@ export const getProvincesForCountry = async (country) => {
         !_.isEmpty(data.province) &&
         standardizeCountryName(data.country.toLowerCase()) ===
           standardizeCountryName(country.toLowerCase()) &&
-        !data.province.toLowerCase().includes('princess')
+        !data.province.toLowerCase().includes('princess') &&
+        !data.province.toLowerCase().includes('recovered')
       );
     })
     .map((provinceData) => {
